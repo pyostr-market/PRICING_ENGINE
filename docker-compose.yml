@@ -5,8 +5,8 @@ networks:
 services:
 
   web-blue:
-    image: ebana.registry.twcstorage.ru/market-pricing-engine:latest
-    container_name: market-pricing-engine-blue
+    image: ebana.registry.twcstorage.ru/pricing-engine:latest
+    container_name: pricing-engine-blue
     command: ["/code/deploy/prod/prod_entrypoint.sh"]
     env_file:
       - .env
@@ -25,8 +25,8 @@ services:
 
 
   web-green:
-    image: ebana.registry.twcstorage.ru/market-pricing-engine:latest
-    container_name: market-pricing-engine-green
+    image: ebana.registry.twcstorage.ru/pricing-engine:latest
+    container_name: pricing-engine-green
     command: ["/code/deploy/prod/prod_entrypoint.sh"]
     env_file:
       - .env
