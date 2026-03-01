@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ebana.registry.twcstorage.ru
-  IMAGE_NAME: market-product-engine
+  IMAGE_NAME: pricing-engine
 
 jobs:
 
@@ -121,10 +121,10 @@ jobs:
             
             set -e
 
-            APP_NAME="market-product-engine"
+            APP_NAME="pricing-engine"
             NETWORK="MARKET_NETWORK"
             REGISTRY="ebana.registry.twcstorage.ru"
-            IMAGE="$REGISTRY/market-product-engine:latest"
+            IMAGE="$REGISTRY/pricing-engine:latest"
 
             echo "===== Docker login ====="
             echo "${{ secrets.REGISTRY_API_TOKEN }}" | docker login $REGISTRY -u token --password-stdin
