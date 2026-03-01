@@ -16,7 +16,7 @@ class TestDeleteColorAssign:
             "/color-assign/",
             json={"key": "delete_key", "color": "цвет_для_удаления"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         # Удаляем
         response = await authorized_client.delete(
@@ -24,7 +24,8 @@ class TestDeleteColorAssign:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["deleted"] is True
+        assert data["success"] is True
+        assert data["data"]["deleted"] is True
 
     async def test_delete_color_assign_404_not_found(self, authorized_client):
         """Удаление несуществующего назначения возвращает 404"""
@@ -32,7 +33,9 @@ class TestDeleteColorAssign:
             "/color-assign/99999",
         )
         assert response.status_code == 404
-        assert "не найдено" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не найдено" in json_response["error"]["message"]
 
     async def test_delete_color_assign_401_unauthorized(self, client):
         """Удаление без авторизации возвращает 401"""
@@ -52,7 +55,7 @@ class TestDeleteColorAssign:
             "/color-assign/",
             json={"key": "verify_key", "color": "проверочный_цвет"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         # Проверяем, что назначение существует
         get_before = await authorized_client.get(f"/color-assign/{assign_id}")

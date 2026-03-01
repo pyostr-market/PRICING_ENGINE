@@ -45,7 +45,6 @@ async def list_color_assigns(
     path='/{assign_id}',
     response_model=ColorAssignResponse,
     dependencies=[Depends(require_permissions("pricing_engine:view"))],
-
 )
 async def get_color_assign(
     assign_id: int,

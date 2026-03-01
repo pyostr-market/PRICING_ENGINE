@@ -18,7 +18,8 @@ class TestDeleteColor:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["deleted"] is True
+        assert data["success"] is True
+        assert data["data"]["deleted"] is True
 
     async def test_delete_color_404_not_found(self, authorized_client):
         """Удаление несуществующего цвета возвращает 404"""
@@ -26,7 +27,9 @@ class TestDeleteColor:
             "/color/несуществующий",
         )
         assert response.status_code == 404
-        assert "не найден" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не найден" in json_response["error"]["message"]
 
     async def test_delete_color_401_unauthorized(self, client):
         """Удаление цвета без авторизации возвращает 401"""
@@ -48,7 +51,7 @@ class TestDeleteColor:
             json={"key": "test_key", "color": "цвет_для_каскада"},
         )
         assert create_assign_response.status_code == 200
-        assign_id = create_assign_response.json()["id"]
+        assign_id = create_assign_response.json()["data"]["id"]
 
         # Проверяем, что назначение существует
         get_response = await authorized_client.get(f"/color-assign/{assign_id}")

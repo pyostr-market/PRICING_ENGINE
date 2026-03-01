@@ -19,7 +19,8 @@ class TestUpdateColor:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "новый"
+        assert data["success"] is True
+        assert data["data"]["name"] == "новый"
 
     async def test_update_color_404_not_found(self, authorized_client):
         """Обновление несуществующего цвета возвращает 404"""
@@ -28,7 +29,9 @@ class TestUpdateColor:
             json={"name": "новый"},
         )
         assert response.status_code == 404
-        assert "не найден" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не найден" in json_response["error"]["message"]
 
     async def test_update_color_409_name_already_exists(self, authorized_client):
         """Обновление цвета на существующее имя возвращает 409"""
@@ -47,7 +50,9 @@ class TestUpdateColor:
             json={"name": "цвет2"},
         )
         assert response.status_code == 409
-        assert "уже существует" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "уже существует" in json_response["error"]["message"]
 
     async def test_update_color_422_empty_name(self, authorized_client):
         """Обновление цвета с пустым именем возвращает 422"""

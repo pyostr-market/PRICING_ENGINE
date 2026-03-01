@@ -13,7 +13,8 @@ class TestCreateColor:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "красный"
+        assert data["success"] is True
+        assert data["data"]["name"] == "красный"
 
     async def test_create_color_409_already_exists(self, authorized_client):
         """Создание цвета с существующим именем возвращает 409"""
@@ -28,7 +29,9 @@ class TestCreateColor:
             json={"name": "синий"},
         )
         assert response.status_code == 409
-        assert "уже существует" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "уже существует" in json_response["error"]["message"]
 
     async def test_create_color_422_empty_name(self, authorized_client):
         """Создание цвета с пустым именем возвращает 422"""

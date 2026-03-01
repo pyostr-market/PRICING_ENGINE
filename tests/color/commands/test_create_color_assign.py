@@ -19,9 +19,10 @@ class TestCreateColorAssign:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["key"] == "product_1"
-        assert data["color"] == "красный"
-        assert "id" in data
+        assert data["success"] is True
+        assert data["data"]["key"] == "product_1"
+        assert data["data"]["color"] == "красный"
+        assert "id" in data["data"]
 
     async def test_create_color_assign_409_already_exists(self, authorized_client):
         """Создание дубликата назначения возвращает 409"""
@@ -41,7 +42,9 @@ class TestCreateColorAssign:
             json={"key": "product_2", "color": "синий"},
         )
         assert response.status_code == 409
-        assert "уже существует" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "уже существует" in json_response["error"]["message"]
 
     async def test_create_color_assign_409_invalid_color(self, authorized_client):
         """Создание назначения с несуществующим цветом возвращает ошибку"""
@@ -50,7 +53,9 @@ class TestCreateColorAssign:
             json={"key": "product_3", "color": "несуществующий_цвет"},
         )
         assert response.status_code == 409
-        assert "не существует" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не существует" in json_response["error"]["message"]
 
     async def test_create_color_assign_422_empty_key(self, authorized_client):
         """Создание назначения с пустым ключом возвращает 422"""

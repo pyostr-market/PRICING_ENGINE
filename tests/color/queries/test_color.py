@@ -10,7 +10,8 @@ class TestListColors:
         response = await authorized_client.get("/color/")
         assert response.status_code == 200
         data = response.json()
-        assert data == []
+        assert data["success"] is True
+        assert data["data"] == []
 
     async def test_list_colors_200_with_data(self, authorized_client):
         """Получение списка с цветами"""
@@ -22,8 +23,10 @@ class TestListColors:
         response = await authorized_client.get("/color/")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 3
-        names = [item["name"] for item in data]
+        assert data["success"] is True
+        items = data["data"]
+        assert len(items) == 3
+        names = [item["name"] for item in items]
         assert "цвет1" in names
         assert "цвет2" in names
         assert "цвет3" in names
@@ -37,7 +40,9 @@ class TestListColors:
         response = await authorized_client.get("/color/")
         assert response.status_code == 200
         data = response.json()
-        names = [item["name"] for item in data]
+        assert data["success"] is True
+        items = data["data"]
+        names = [item["name"] for item in items]
         assert names == sorted(names)
 
 
@@ -56,10 +61,13 @@ class TestGetColor:
         response = await authorized_client.get("/color/искомый_цвет")
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "искомый_цвет"
+        assert data["success"] is True
+        assert data["data"]["name"] == "искомый_цвет"
 
     async def test_get_color_404_not_found(self, authorized_client):
         """Получение несуществующего цвета возвращает 404"""
         response = await authorized_client.get("/color/несуществующий")
         assert response.status_code == 404
-        assert "не найден" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не найден" in json_response["error"]["message"]

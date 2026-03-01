@@ -10,7 +10,8 @@ class TestListColorAssigns:
         response = await authorized_client.get("/color-assign/")
         assert response.status_code == 200
         data = response.json()
-        assert data == []
+        assert data["success"] is True
+        assert data["data"] == []
 
     async def test_list_color_assigns_200_with_data(self, authorized_client):
         """Получение списка с назначениями"""
@@ -31,7 +32,9 @@ class TestListColorAssigns:
         response = await authorized_client.get("/color-assign/")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 2
+        assert data["success"] is True
+        items = data["data"]
+        assert len(items) == 2
 
     async def test_list_color_assigns_filter_by_color(self, authorized_client):
         """Фильтрация назначений по цвету"""
@@ -60,8 +63,10 @@ class TestListColorAssigns:
         )
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 2
-        assert all(item["color"] == "красный" for item in data)
+        assert data["success"] is True
+        items = data["data"]
+        assert len(items) == 2
+        assert all(item["color"] == "красный" for item in items)
 
         # Фильтруем по цвету "синий"
         response = await authorized_client.get(
@@ -70,8 +75,10 @@ class TestListColorAssigns:
         )
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["color"] == "синий"
+        assert data["success"] is True
+        items = data["data"]
+        assert len(items) == 1
+        assert items[0]["color"] == "синий"
 
 
 @pytest.mark.asyncio
@@ -89,18 +96,21 @@ class TestGetColorAssign:
             "/color-assign/",
             json={"key": "target_key", "color": "нужный_цвет"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         # Получаем назначение
         response = await authorized_client.get(f"/color-assign/{assign_id}")
         assert response.status_code == 200
         data = response.json()
-        assert data["id"] == assign_id
-        assert data["key"] == "target_key"
-        assert data["color"] == "нужный_цвет"
+        assert data["success"] is True
+        assert data["data"]["id"] == assign_id
+        assert data["data"]["key"] == "target_key"
+        assert data["data"]["color"] == "нужный_цвет"
 
     async def test_get_color_assign_404_not_found(self, authorized_client):
         """Получение несуществующего назначения возвращает 404"""
         response = await authorized_client.get("/color-assign/99999")
         assert response.status_code == 404
-        assert "не найдено" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не найдено" in json_response["error"]["message"]

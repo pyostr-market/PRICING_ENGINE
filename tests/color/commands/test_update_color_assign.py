@@ -20,7 +20,7 @@ class TestUpdateColorAssign:
             "/color-assign/",
             json={"key": "old_key", "color": "старый_цвет"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         # Обновляем
         response = await authorized_client.put(
@@ -29,9 +29,10 @@ class TestUpdateColorAssign:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["key"] == "new_key"
-        assert data["color"] == "новый_цвет"
-        assert data["id"] == assign_id
+        assert data["success"] is True
+        assert data["data"]["key"] == "new_key"
+        assert data["data"]["color"] == "новый_цвет"
+        assert data["data"]["id"] == assign_id
 
     async def test_update_color_assign_200_partial_update(self, authorized_client):
         """Частичное обновление назначения (только ключ или только цвет)"""
@@ -47,7 +48,7 @@ class TestUpdateColorAssign:
             "/color-assign/",
             json={"key": "key1", "color": "цвет1"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         # Обновляем только цвет
         response = await authorized_client.put(
@@ -56,8 +57,9 @@ class TestUpdateColorAssign:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["key"] == "key1"
-        assert data["color"] == "цвет2"
+        assert data["success"] is True
+        assert data["data"]["key"] == "key1"
+        assert data["data"]["color"] == "цвет2"
 
     async def test_update_color_assign_404_not_found(self, authorized_client):
         """Обновление несуществующего назначения возвращает 404"""
@@ -66,7 +68,9 @@ class TestUpdateColorAssign:
             json={"key": "new_key", "color": "красный"},
         )
         assert response.status_code == 404
-        assert "не найдено" in response.json()["message"]
+        json_response = response.json()
+        assert json_response["success"] is False
+        assert "не найдено" in json_response["error"]["message"]
 
     async def test_update_color_assign_409_invalid_color(self, authorized_client):
         """Обновление с несуществующим цветом возвращает ошибку"""
@@ -78,13 +82,15 @@ class TestUpdateColorAssign:
             "/color-assign/",
             json={"key": "test_key", "color": "существующий"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         response = await authorized_client.put(
             f"/color-assign/{assign_id}",
             json={"color": "несуществующий"},
         )
         assert response.status_code == 409
+        json_response = response.json()
+        assert json_response["success"] is False
 
     async def test_update_color_assign_422_empty_key(self, authorized_client):
         """Обновление с пустым ключом возвращает 422"""
@@ -96,7 +102,7 @@ class TestUpdateColorAssign:
             "/color-assign/",
             json={"key": "test", "color": "тест"},
         )
-        assign_id = create_response.json()["id"]
+        assign_id = create_response.json()["data"]["id"]
 
         response = await authorized_client.put(
             f"/color-assign/{assign_id}",
