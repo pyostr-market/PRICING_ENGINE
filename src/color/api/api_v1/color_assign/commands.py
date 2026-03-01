@@ -1,9 +1,11 @@
-from typing import Optional
-
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.color.api.api_v1.color_assign.schemas import (
+    ColorAssignCreateRequest,
+    ColorAssignResponse,
+    ColorAssignUpdateRequest,
+)
 from src.color.application.dto.color import ColorAssignCreateDTO, ColorAssignUpdateDTO
 from src.color.composition import ColorComposition
 from src.core.api.responses import api_response
@@ -14,25 +16,6 @@ from src.core.db.database import get_db
 color_assign_commands_router = APIRouter(
     tags=["Назначения цветов"],
 )
-
-
-class ColorAssignCreateRequest(BaseModel):
-    key: str = Field(..., description="Ключ назначения", min_length=1, max_length=50)
-    color: str = Field(..., description="Название цвета", min_length=1, max_length=50)
-
-
-class ColorAssignUpdateRequest(BaseModel):
-    key: Optional[str] = Field(None, description="Ключ назначения", min_length=1, max_length=50)
-    color: Optional[str] = Field(None, description="Название цвета", min_length=1, max_length=50)
-
-
-class ColorAssignResponse(BaseModel):
-    id: int
-    key: str
-    color: str
-
-    class Config:
-        from_attributes = True
 
 
 @color_assign_commands_router.post(

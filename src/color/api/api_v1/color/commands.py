@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.color.api.api_v1.color.schemas import (
+    ColorCreateRequest,
+    ColorResponse,
+    ColorUpdateRequest,
+)
 from src.color.application.dto.color import ColorDTO
 from src.color.composition import ColorComposition
 from src.core.api.responses import api_response
@@ -12,21 +16,6 @@ from src.core.db.database import get_db
 color_commands_router = APIRouter(
     tags=["Цвета"],
 )
-
-
-class ColorCreateRequest(BaseModel):
-    name: str = Field(..., description="Название цвета", min_length=1, max_length=50)
-
-
-class ColorUpdateRequest(BaseModel):
-    name: str = Field(..., description="Новое название цвета", min_length=1, max_length=50)
-
-
-class ColorResponse(BaseModel):
-    name: str
-
-    class Config:
-        from_attributes = True
 
 
 @color_commands_router.post(

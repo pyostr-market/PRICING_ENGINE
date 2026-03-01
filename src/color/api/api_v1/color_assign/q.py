@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.color.composition import ColorComposition
@@ -14,12 +14,11 @@ color_assign_q_router = APIRouter(
 
 
 class ColorAssignResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     key: str
     color: str
 
-    class Config:
-        from_attributes = True
 
 
 @color_assign_q_router.get(

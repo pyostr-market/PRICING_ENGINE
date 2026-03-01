@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.color.api.api_v1.color.schemas import ColorResponse
 from src.color.composition import ColorComposition
 from src.core.api.responses import api_response
 from src.core.auth.schemas.user import User
@@ -10,13 +10,6 @@ from src.core.db.database import get_db
 color_q_router = APIRouter(
     tags=["Цвета"],
 )
-
-
-class ColorResponse(BaseModel):
-    name: str
-
-    class Config:
-        from_attributes = True
 
 
 @color_q_router.get(

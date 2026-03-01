@@ -1,8 +1,11 @@
+from sqlalchemy.exc import IntegrityError
+
 from src.color.application.dto.color import ColorAssignCreateDTO, ColorAssignDTO
 from src.color.domain.repository.color_repository import ColorAssignRepository
 from src.core.auth.schemas.user import User
 from src.core.db.unit_of_work import UnitOfWork
 from src.core.events import AsyncEventBus, build_event
+from src.core.exceptions.service_errors import ColorAssignForeignKeyViolationError
 
 
 class CreateColorAssignCommand:
@@ -24,11 +27,16 @@ class CreateColorAssignCommand:
         user: User,
     ) -> ColorAssignDTO:
         """Создать новое назначение цвета"""
-        async with self.uow:
-            created = await self.repository.create(
-                key=dto.key,
-                color=dto.color,
-            )
+        try:
+            async with self.uow:
+                created = await self.repository.create(
+                    key=dto.key,
+                    color=dto.color,
+                )
+        except IntegrityError as e:
+            if "foreign key" in str(e.orig).lower():
+                raise ColorAssignForeignKeyViolationError(color=dto.color) from e
+            raise
 
         # Публикуем событие
         self.event_bus.publish_nowait(
