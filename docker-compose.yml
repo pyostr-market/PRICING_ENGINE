@@ -5,8 +5,8 @@ networks:
 services:
 
   web-blue:
-    image: ebana.registry.twcstorage.ru/market-product-engine:latest
-    container_name: market-product-engine-blue
+    image: ebana.registry.twcstorage.ru/market-pricing-engine:latest
+    container_name: market-pricing-engine-blue
     command: ["/code/deploy/prod/prod_entrypoint.sh"]
     env_file:
       - .env
@@ -14,7 +14,7 @@ services:
     networks:
       MARKET_NETWORK:
         aliases:
-          - web-product-engine
+          - web-pricing-engine
 
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8000/system/health || exit 1" ]
@@ -25,8 +25,8 @@ services:
 
 
   web-green:
-    image: ebana.registry.twcstorage.ru/market-product-engine:latest
-    container_name: market-product-engine-green
+    image: ebana.registry.twcstorage.ru/market-pricing-engine:latest
+    container_name: market-pricing-engine-green
     command: ["/code/deploy/prod/prod_entrypoint.sh"]
     env_file:
       - .env
@@ -34,7 +34,7 @@ services:
     networks:
       MARKET_NETWORK:
         aliases:
-          - web-product-engine
+          - web-pricing-engine
 
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8000/system/health || exit 1" ]
