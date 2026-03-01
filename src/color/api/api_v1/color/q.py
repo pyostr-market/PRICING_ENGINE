@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.auth.dependencies import require_permissions
 from src.color.api.api_v1.color.schemas import ColorResponse
 from src.color.composition import ColorComposition
 from src.core.api.responses import api_response
@@ -15,6 +16,8 @@ color_q_router = APIRouter(
 @color_q_router.get(
     path='/',
     response_model=list[ColorResponse],
+    dependencies=[Depends(require_permissions("pricing_engine:view"))],
+
 )
 async def list_colors(
     db: AsyncSession = Depends(get_db),
@@ -28,6 +31,7 @@ async def list_colors(
 @color_q_router.get(
     path='/{name}',
     response_model=ColorResponse,
+    dependencies=[Depends(require_permissions("pricing_engine:view"))],
 )
 async def get_color(
     name: str,

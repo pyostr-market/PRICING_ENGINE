@@ -27,9 +27,7 @@ from src.mount_routes import app
 @pytest.fixture
 def authorized_user():
     permissions_names = [
-        'pricing_engine:create',
-        'pricing_engine:view',
-
+        'pricing_engine',
     ]
     permissions = []
     for ids, name  in enumerate(permissions_names):

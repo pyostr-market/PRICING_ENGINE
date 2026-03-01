@@ -9,7 +9,7 @@ from src.color.api.api_v1.color.schemas import (
 from src.color.application.dto.color import ColorDTO
 from src.color.composition import ColorComposition
 from src.core.api.responses import api_response
-from src.core.auth.dependencies import get_current_user
+from src.core.auth.dependencies import get_current_user, require_permissions
 from src.core.auth.schemas.user import User
 from src.core.db.database import get_db
 
@@ -21,6 +21,8 @@ color_commands_router = APIRouter(
 @color_commands_router.post(
     path='/',
     response_model=ColorResponse,
+    dependencies=[Depends(require_permissions("pricing_engine:create"))],
+
 )
 async def create_color(
     request: ColorCreateRequest,
@@ -37,6 +39,8 @@ async def create_color(
 @color_commands_router.put(
     path='/{name}',
     response_model=ColorResponse,
+    dependencies=[Depends(require_permissions("pricing_engine:update"))],
+
 )
 async def update_color(
     name: str,
@@ -53,6 +57,8 @@ async def update_color(
 
 @color_commands_router.delete(
     path='/{name}',
+    dependencies=[Depends(require_permissions("pricing_engine:delete"))],
+
 )
 async def delete_color(
     name: str,

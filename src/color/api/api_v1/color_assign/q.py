@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.auth.dependencies import require_permissions
 from src.color.composition import ColorComposition
 from src.core.api.responses import api_response
 from src.core.db.database import get_db
@@ -24,6 +25,8 @@ class ColorAssignResponse(BaseModel):
 @color_assign_q_router.get(
     path='/',
     response_model=list[ColorAssignResponse],
+    dependencies=[Depends(require_permissions("pricing_engine:view"))],
+
 )
 async def list_color_assigns(
     color: Optional[str] = None,
@@ -41,6 +44,8 @@ async def list_color_assigns(
 @color_assign_q_router.get(
     path='/{assign_id}',
     response_model=ColorAssignResponse,
+    dependencies=[Depends(require_permissions("pricing_engine:view"))],
+
 )
 async def get_color_assign(
     assign_id: int,
