@@ -1,8 +1,14 @@
+from sqlalchemy.exc import IntegrityError
+
 from src.color.application.dto.color import ColorAssignDTO, ColorAssignUpdateDTO
 from src.color.domain.repository.color_repository import ColorAssignRepository
 from src.core.auth.schemas.user import User
 from src.core.db.unit_of_work import UnitOfWork
 from src.core.events import AsyncEventBus, build_event
+from src.core.exceptions.service_errors import (
+    ColorAssignForeignKeyViolationError,
+    ColorAssignNotFoundError,
+)
 
 
 class UpdateColorAssignCommand:
@@ -28,15 +34,20 @@ class UpdateColorAssignCommand:
         # Проверяем, существует ли назначение
         existing = await self.repository.get(assign_id)
         if not existing:
-            from src.core.exceptions.service_errors import ColorAssignNotFoundError
             raise ColorAssignNotFoundError(assign_id)
 
-        async with self.uow:
-            updated = await self.repository.update(
-                assign_id=assign_id,
-                key=dto.key,
-                color=dto.color,
-            )
+        try:
+            async with self.uow:
+                updated = await self.repository.update(
+                    assign_id=assign_id,
+                    key=dto.key,
+                    color=dto.color,
+                )
+        except IntegrityError as e:
+            error_str = str(e.orig).lower()
+            if "foreign key" in error_str:
+                raise ColorAssignForeignKeyViolationError(color=dto.color or existing.color) from e
+            raise
 
         # Публикуем событие
         self.event_bus.publish_nowait(

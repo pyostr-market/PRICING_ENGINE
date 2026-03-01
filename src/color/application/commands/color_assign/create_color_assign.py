@@ -34,8 +34,12 @@ class CreateColorAssignCommand:
                     color=dto.color,
                 )
         except IntegrityError as e:
-            if "foreign key" in str(e.orig).lower():
+            error_str = str(e.orig).lower()
+            if "foreign key" in error_str:
                 raise ColorAssignForeignKeyViolationError(color=dto.color) from e
+            if "unique" in error_str or "duplicate" in error_str:
+                from src.core.exceptions.service_errors import ColorAssignAlreadyExistsError
+                raise ColorAssignAlreadyExistsError(key=dto.key, color=dto.color) from e
             raise
 
         # Публикуем событие
