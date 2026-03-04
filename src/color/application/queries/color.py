@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from src.color.application.dto.color import ColorAssignDTO, ColorDTO
 from src.color.domain.repository.color_repository import (
@@ -24,10 +24,14 @@ class ColorQueries:
             raise ColorNotFoundError(name)
         return ColorDTO(name=color.name)
 
-    async def list_colors(self) -> List[ColorDTO]:
-        """Получить список всех цветов"""
-        colors = await self.repository.list()
-        return [ColorDTO(name=color.name) for color in colors]
+    async def list_colors(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> Tuple[List[ColorDTO], int]:
+        """Получить список всех цветов с пагинацией"""
+        colors, total = await self.repository.list(limit=limit, offset=offset)
+        return [ColorDTO(name=color.name) for color in colors], total
 
 
 class ColorAssignQueries:
@@ -54,9 +58,11 @@ class ColorAssignQueries:
     async def list_color_assigns(
         self,
         color: Optional[str] = None,
-    ) -> List[ColorAssignDTO]:
-        """Получить список всех назначений"""
-        assigns = await self.repository.list(color=color)
+        limit: int = 100,
+        offset: int = 0,
+    ) -> Tuple[List[ColorAssignDTO], int]:
+        """Получить список всех назначений с пагинацией"""
+        assigns, total = await self.repository.list(color=color, limit=limit, offset=offset)
         return [
             ColorAssignDTO(
                 id=assign.id,
@@ -64,4 +70,4 @@ class ColorAssignQueries:
                 color=assign.color,
             )
             for assign in assigns
-        ]
+        ], total

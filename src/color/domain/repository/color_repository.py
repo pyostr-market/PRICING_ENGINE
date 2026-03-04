@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from src.color.domain.aggregates.color import ColorAggregate, ColorAssignAggregate
 
@@ -13,8 +13,12 @@ class ColorRepository(ABC):
         pass
 
     @abstractmethod
-    async def list(self) -> List[ColorAggregate]:
-        """Получить список всех цветов"""
+    async def list(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> Tuple[List[ColorAggregate], int]:
+        """Получить список всех цветов с пагинацией"""
         pass
 
     @abstractmethod
@@ -42,8 +46,13 @@ class ColorAssignRepository(ABC):
         pass
 
     @abstractmethod
-    async def list(self, color: Optional[str] = None) -> List[ColorAssignAggregate]:
-        """Получить список всех назначений"""
+    async def list(
+        self,
+        color: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> Tuple[List[ColorAssignAggregate], int]:
+        """Получить список всех назначений с пагинацией"""
         pass
 
     @abstractmethod

@@ -11,7 +11,8 @@ class TestListColors:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        assert data["data"] == []
+        assert data["data"]["items"] == []
+        assert data["data"]["total"] == 0
 
     async def test_list_colors_200_with_data(self, authorized_client):
         """Получение списка с цветами"""
@@ -24,8 +25,10 @@ class TestListColors:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        items = data["data"]
+        items = data["data"]["items"]
+        total = data["data"]["total"]
         assert len(items) == 3
+        assert total == 3
         names = [item["name"] for item in items]
         assert "цвет1" in names
         assert "цвет2" in names
@@ -41,9 +44,30 @@ class TestListColors:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        items = data["data"]
+        items = data["data"]["items"]
         names = [item["name"] for item in items]
         assert names == sorted(names)
+
+    async def test_list_colors_pagination(self, authorized_client):
+        """Тест пагинации списка цветов"""
+        # Создаем 15 цветов
+        for i in range(15):
+            await authorized_client.post("/color/", json={"name": f"цвет{i}"})
+
+        # Получаем первые 10
+        response = await authorized_client.get("/color/?limit=10&offset=0")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert len(data["data"]["items"]) == 10
+        assert data["data"]["total"] == 15
+
+        # Получаем следующие 5
+        response = await authorized_client.get("/color/?limit=10&offset=10")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["data"]["items"]) == 5
+        assert data["data"]["total"] == 15
 
 
 @pytest.mark.asyncio

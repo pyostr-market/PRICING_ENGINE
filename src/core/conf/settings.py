@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     API_MODULES: list = [
         "src.core.api.api_module:CoreApiModule",
         "src.color.api_module:ColorApiModule",
+        "src.price.api_module:PriceApiModule",
     ]
     # ===============================
     # POSTGRES

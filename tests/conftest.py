@@ -44,7 +44,7 @@ def authorized_user():
         permissions=permissions
     )
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 def pg_container():
     container = PostgresContainer("postgres:18")
     container.start()
@@ -55,7 +55,7 @@ def pg_container():
 # ENGINE (function scope!)
 # ------------------------------
 
-@pytest_asyncio.fixture()
+@pytest_asyncio.fixture(scope="function")
 async def engine(pg_container):
     url = pg_container.get_connection_url().replace(
         "psycopg2", "asyncpg"
@@ -164,10 +164,5 @@ async def client(engine):
 
 @pytest_asyncio.fixture(autouse=True)
 async def cleanup_test_data(engine):
-    """Очистка данных между тестами."""
-    # Очищаем данные ПЕРЕД каждым тестом
-    async with engine.begin() as conn:
-        await conn.execute(__import__('sqlalchemy').text("DELETE FROM color_assign CASCADE"))
-        await conn.execute(__import__('sqlalchemy').text("DELETE FROM color CASCADE"))
-
+    """Очистка данных между тестами (если нужно)."""
     yield

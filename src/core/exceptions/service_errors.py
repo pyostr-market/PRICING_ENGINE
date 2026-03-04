@@ -42,3 +42,23 @@ class ColorAssignAlreadyExistsError(ConflictError):
 class ColorAssignForeignKeyViolationError(ConflictError):
     def __init__(self, color: str):
         super().__init__(message=f"Цвет '{color}' не существует в таблице color")
+
+
+# === Price Errors ===
+
+
+class PriceNotFoundError(NotFoundError):
+    def __init__(self, price_id: int):
+        super().__init__(message=f"Прайс с ID {price_id} не найден")
+
+
+class PriceAlreadyExistsError(ConflictError):
+    def __init__(self, category: str, supplier: str, region: str):
+        super().__init__(
+            message=f"Прайс для категории '{category}', поставщика '{supplier}' и региона '{region}' уже существует"
+        )
+
+
+class PriceForeignKeyViolationError(ConflictError):
+    def __init__(self):
+        super().__init__(message="Нарушение внешней ссылки при операции с прайсом")

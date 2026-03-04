@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.color.domain.aggregates.color import ColorAggregate, ColorAssignAggregate
@@ -26,12 +26,22 @@ class SqlAlchemyColorRepository(ColorRepository):
             return ColorAggregate(name=color.name)
         return None
 
-    async def list(self) -> List[ColorAggregate]:
-        """Получить список всех цветов"""
-        query = select(Color).order_by(Color.name)
+    async def list(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> Tuple[List[ColorAggregate], int]:
+        """Получить список всех цветов с пагинацией"""
+        # Получаем общее количество
+        count_query = select(func.count()).select_from(Color)
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar() or 0
+        
+        # Получаем данные с пагинацией
+        query = select(Color).order_by(Color.name).offset(offset).limit(limit)
         result = await self.db.execute(query)
         colors = result.scalars().all()
-        return [ColorAggregate(name=color.name) for color in colors]
+        return [ColorAggregate(name=color.name) for color in colors], total
 
     async def save(self, aggregate: ColorAggregate) -> ColorAggregate:
         """Сохранить цвет (обновление)"""
@@ -79,11 +89,27 @@ class SqlAlchemyColorAssignRepository(ColorAssignRepository):
             )
         return None
 
-    async def list(self, color: Optional[str] = None) -> List[ColorAssignAggregate]:
-        """Получить список всех назначений"""
+    async def list(
+        self,
+        color: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> Tuple[List[ColorAssignAggregate], int]:
+        """Получить список всех назначений с пагинацией"""
+        # Базовый запрос
         query = select(ColorAssign).order_by(ColorAssign.id)
         if color:
             query = query.where(ColorAssign.color == color)
+        
+        # Получаем общее количество
+        count_query = select(func.count()).select_from(ColorAssign)
+        if color:
+            count_query = count_query.where(ColorAssign.color == color)
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar() or 0
+        
+        # Получаем данные с пагинацией
+        query = query.offset(offset).limit(limit)
         result = await self.db.execute(query)
         assigns = result.scalars().all()
         return [
@@ -93,7 +119,7 @@ class SqlAlchemyColorAssignRepository(ColorAssignRepository):
                 color=assign.color,
             )
             for assign in assigns
-        ]
+        ], total
 
     async def create(
         self,

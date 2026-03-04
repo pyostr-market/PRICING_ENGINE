@@ -3,3 +3,8 @@
 # Цвета
 #################################
 from src.color.infrastructure.models import *
+
+#################################
+# Прайсы
+#################################
+from src.price.infrastructure.models import *
