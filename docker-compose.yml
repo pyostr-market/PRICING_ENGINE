@@ -23,7 +23,6 @@ services:
       retries: 10
       start_period: 20s
 
-
   web-green:
     image: ebana.registry.twcstorage.ru/pricing-engine:latest
     container_name: pricing-engine-green
